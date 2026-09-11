@@ -1,0 +1,42 @@
+//! Ledger gRPC server binary (build-order step 1, architecture §8).
+//!
+//! Startup: connect to Postgres, run migrations (idempotent), serve the §8
+//! Ledger service with graceful shutdown on Ctrl-C.
+//!
+//! Configuration (environment, never committed):
+//! - `DATABASE_URL` — Postgres connection string (see db.rs)
+//! - `LEDGER_GRPC_ADDR` — listen address (default 127.0.0.1:50051)
+//! - `LEDGER_GRPC_TOKEN` — shared secret callers must present as
+//!   `x-ledger-token`; deploy from the secrets manager. The dev default is
+//!   for local testing only.
+use amber_ledger::db;
+use amber_ledger::engine::LedgerEngine;
+use amber_ledger::grpc::LedgerGrpc;
+use tonic::transport::Server;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let database_url = db::database_url_from_env();
+    let pool = db::connect(&database_url).await?;
+    db::run_migrations(&pool).await?;
+
+    let addr = std::env::var("LEDGER_GRPC_ADDR")
+        .unwrap_or_else(|_| "127.0.0.1:50051".to_string())
+        .parse::<std::net::SocketAddr>()?;
+
+    let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
+    tokio::spawn(async move {
+        let _ = tokio::signal::ctrl_c().await;
+        let _ = shutdown_tx.send(());
+    });
+
+    println!("ledger gRPC listening on {addr}");
+    Server::builder()
+        .add_service(LedgerGrpc::new(LedgerEngine::new(pool)).into_server())
+        .serve_with_shutdown(addr, async {
+            let _ = shutdown_rx.await;
+        })
+        .await?;
+    println!("ledger gRPC shut down cleanly");
+    Ok(())
+}
