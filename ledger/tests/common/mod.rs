@@ -14,7 +14,13 @@ use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
 use uuid::Uuid;
 
+fn ensure_test_token() {
+    // Intentionally no implicit default token. The gRPC boundary should fail
+    // closed unless an explicit dev/test mode is enabled by the test itself.
+}
+
 pub async fn pool() -> PgPool {
+    ensure_test_token();
     let url = db::database_url_from_env();
     let schema = test_schema_name();
     ensure_schema(&url, schema).await;

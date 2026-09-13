@@ -1,5 +1,7 @@
 # AMBER PAY — Design Deliverables
 
+Start here for repo scope: [repo-scope.md](repo-scope.md) explains what is implemented today vs. designed but not built vs. not started. The repository is currently the ledger service only; the Core API and end-to-end product flows are still future work.
+
 Index of the AmberPay checklist deliverables (§1/§78). Status: ✅ written ·
 🔶 partial · ⛔ not started.
 

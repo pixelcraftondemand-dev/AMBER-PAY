@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: sl.amberpay.coreapi.checkout.CheckoutControllerTest
+-------------------------------------------------------------------------------
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.48 s -- in sl.amberpay.coreapi.checkout.CheckoutControllerTest

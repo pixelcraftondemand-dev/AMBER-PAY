@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: sl.amberpay.coreapi.paymentmethod.PaymentMethodControllerTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.55 s -- in sl.amberpay.coreapi.paymentmethod.PaymentMethodControllerTest

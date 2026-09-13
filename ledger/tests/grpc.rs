@@ -84,6 +84,16 @@ fn no_auth<T>(req: tonic::Request<T>) -> tonic::Request<T> {
     req
 }
 
+fn set_dev_test_token() {
+    std::env::set_var("APP_ENV", "dev");
+    std::env::set_var("LEDGER_GRPC_TOKEN", TOKEN);
+}
+
+fn clear_server_secret() {
+    std::env::remove_var("APP_ENV");
+    std::env::remove_var("LEDGER_GRPC_TOKEN");
+}
+
 async fn balance_of(
     client: &mut LedgerClient<Channel>,
     id: String,
@@ -142,6 +152,7 @@ fn transfer_req_inner(key: &str, payer: &str, payee: &str, amount: i64) -> PbTra
 #[tokio::test]
 async fn grpc_transfer_replay_and_balance() {
     let _guard = GRPC_LOCK.lock().await;
+    set_dev_test_token();
     let p = pool().await;
     truncate_all(&p).await;
     let mut client = spawn_server().await;
@@ -207,6 +218,7 @@ async fn grpc_transfer_replay_and_balance() {
 #[tokio::test]
 async fn grpc_rejects_missing_token() {
     let _guard = GRPC_LOCK.lock().await;
+    set_dev_test_token();
     let p = pool().await;
     truncate_all(&p).await;
     let mut client = spawn_server().await;
@@ -226,8 +238,48 @@ async fn grpc_rejects_missing_token() {
 }
 
 #[tokio::test]
+async fn grpc_rejects_legacy_default_token_when_env_missing() {
+    let _guard = GRPC_LOCK.lock().await;
+    let previous = std::env::var("LEDGER_GRPC_TOKEN").ok();
+    clear_server_secret();
+
+    // The app must fail closed when the secret is absent in non-dev mode.
+    let p = pool().await;
+    truncate_all(&p).await;
+    let mut client = spawn_server().await;
+    let payer = common::create_wallet(&p, Currency::Sle, 1_000).await;
+    let payee = common::create_wallet(&p, Currency::Sle, 0).await;
+
+    let mut req = tonic::Request::new(transfer_req_inner(
+        "t-legacy-default",
+        &payer.to_string(),
+        &payee.to_string(),
+        100,
+    ));
+    req.metadata_mut().insert(
+        "x-ledger-token",
+        MetadataValue::try_from("amberpay-internal-dev").expect("legacy dev token"),
+    );
+
+    let err = client
+        .post_transfer(req)
+        .await
+        .expect_err("legacy default token should be rejected when env secret is unset");
+    assert!(
+        err.message().contains("ledger token") || err.message().contains("unauthenticated")
+    );
+
+    if let Some(token) = previous {
+        std::env::set_var("LEDGER_GRPC_TOKEN", token);
+    } else {
+        std::env::remove_var("LEDGER_GRPC_TOKEN");
+    }
+}
+
+#[tokio::test]
 async fn grpc_mismatch_and_insufficient_funds_map_to_status_codes() {
     let _guard = GRPC_LOCK.lock().await;
+    set_dev_test_token();
     let p = pool().await;
     truncate_all(&p).await;
     let mut client = spawn_server().await;

@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: amber-core-api
+
+ledger:
+  grpc:
+    address: ${LEDGER_GRPC_ADDR:127.0.0.1:50051}
+    token: ${LEDGER_GRPC_TOKEN:amberpay-internal-dev}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

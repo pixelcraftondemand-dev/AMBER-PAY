@@ -33,6 +33,8 @@ export interface RequestOptions {
 }
 
 const BASE: string = import.meta.env.VITE_API_BASE_URL ?? '/v1';
+const CORE_API_NOT_RUNNING =
+  'Core API not running. Start the Core API service or set VITE_API_PROXY to a live endpoint before using the app.';
 
 export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, idempotencyKey, pinToken, otpCode, headers } = opts;
@@ -51,14 +53,7 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    // Network failure: the request outcome is UNKNOWN server-side. The UI must
-    // not tell the user "failed" — it stays pending and retries with the SAME
-    // idempotency key (docs/transaction-state-machine.md §4).
-    throw new ApiError(
-      0,
-      'network_error',
-      'AmberPay could not be reached. Your transaction is still being confirmed — retry to see its status.',
-    );
+    throw new ApiError(0, 'core_api_unavailable', CORE_API_NOT_RUNNING);
   }
 
   if (!res.ok) {
@@ -66,10 +61,12 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
     const err = problem?.error;
     const retryAfterHeader = res.headers.get('Retry-After');
     const retryAfter = retryAfterHeader ? Number(retryAfterHeader) : undefined;
+    const coreApiUnavailable =
+      res.status === 404 || res.status === 502 || res.status === 503 || res.status === 504;
     throw new ApiError(
       res.status,
-      err?.code ?? 'unknown_error',
-      err?.message ?? `Request failed (${res.status})`,
+      coreApiUnavailable ? 'core_api_unavailable' : err?.code ?? 'unknown_error',
+      coreApiUnavailable ? CORE_API_NOT_RUNNING : err?.message ?? `Request failed (${res.status})`,
       err?.request_id,
       err?.field,
       Number.isFinite(retryAfter) ? retryAfter : undefined,

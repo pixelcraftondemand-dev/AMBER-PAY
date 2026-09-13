@@ -84,12 +84,12 @@ describe('apiRequest — error contract (problem+json)', () => {
     expect(err.retryAfter).toBe(30);
   });
 
-  it('network failure maps to status 0 with the pending-oriented message', async () => {
+  it('network failure maps to status 0 with the explicit Core API unavailable message', async () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
     const err = (await apiRequest('/transfers', { method: 'POST' }).catch((e) => e)) as ApiError;
     expect(err).toBeInstanceOf(ApiError);
     expect(err.status).toBe(0);
-    expect(err.message).toMatch(/still being confirmed/i);
+    expect(err.message).toMatch(/core api not running/i);
   });
 
   it('a malformed error body still yields an ApiError, not a crash', async () => {

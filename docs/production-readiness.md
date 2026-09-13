@@ -55,8 +55,11 @@ verification by the appropriate humans and authorities.
    (`reverse_journal`, `refund_payment` + `ledger/tests/reversals.rs`).
 4. **`ledger_events` outbox has no consumer yet** — the Java core outbox
    consumer is part of the Java build.
-5. **No gRPC server** (tonic) exposing the ledger interface
-   (docs/api.md §12) — ledger is exercised via the Rust API in tests.
+5. ~~**No gRPC server** (tonic) exposing the ledger interface~~ **closed** —
+   `ledger/src/grpc.rs` and `ledger/proto/ledger.proto` implement the server,
+   with auth and end-to-end tests in `ledger/tests/grpc.rs`. Note: the
+   production token must be set in deployment; unset tokens now fail closed,
+   and the local test harness injects the dev-only default only in test mode.
 6. **Rail statement sources are stubs** (`RailStatementSource::Stub`) —
    Orange Money adapter to land with the rail integration.
 7. **App-layer audit log, webhook event store, devices, and risk/case

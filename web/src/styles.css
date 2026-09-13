@@ -442,9 +442,24 @@ select {
   padding-top: 16px;
 }
 
-.greet h2 {
-  margin: 0;
-  font-size: 1.05rem;
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.brand-mark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.brand-logo {
+  display: block;
+  width: 148px;
+  height: auto;
 }
 
 .icon-btn {

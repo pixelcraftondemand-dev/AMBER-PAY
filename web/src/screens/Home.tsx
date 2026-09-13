@@ -64,7 +64,10 @@ export function Home() {
       <div className="greet">
         <div>
           <div className="faint" style={{ fontSize: '.75rem' }}>{greetingNow()}</div>
-          <h2>AmberPay</h2>
+          <div className="brand-lockup">
+            <img src="/icon-mark.png" alt="AmberPay mark" className="brand-mark" />
+            <img src="/amberpay-logo.svg" alt="AmberPay" className="brand-logo" />
+          </div>
         </div>
         <button
           type="button"

@@ -3,6 +3,12 @@
 *.env
 .idea/
 .vscode/
+*.profraw
+*.lcov
+lcov.info
+/coverage/
+*.exe
+rustup-init.exe
 
 # Web client (web/)
 web/node_modules/

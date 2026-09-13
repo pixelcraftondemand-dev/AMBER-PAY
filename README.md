@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This repository currently contains the ledger service only. The Core API (auth, KYC, fraud, provider rails, webhook dispatch, transaction state machine) does not exist yet — see [docs/architecture.md](docs/architecture.md). The web client cannot complete a real request without it.
+
 # Amber Pay — Ledger Service (Rust)
 
 The double-entry ledger engine for **AMBER PAY** (Sierra Leone; SLE primary, USD
@@ -5,6 +8,8 @@ secondary). This crate (`amber-ledger`) is the correctness-critical money path:
 journal posting, holds, idempotency, derived balances, fee math, and rail
 reconciliation. Only this service ever writes to the ledger tables — enforced
 with separate database roles, not convention.
+
+See [docs/repo-scope.md](docs/repo-scope.md) for the current implemented vs designed vs not started status, and [docs/README.md](docs/README.md) for the design-index.
 
 > **Conventions (PixelCraft Engineering Standards):** every Rust change must
 > pass `cargo fmt --check` and `cargo clippy -- -D warnings`; correctness

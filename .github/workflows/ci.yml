@@ -59,6 +59,8 @@ jobs:
         run: cargo test --lib --test properties
       - name: Integration tests (real Postgres)
         run: cargo test --tests
+      - name: Check production-readiness drift
+        run: python3 .github/scripts/check_production_gap_drift.py
 
   # Stage 3: build (release) — catches link/optimization-level issues.
   build:

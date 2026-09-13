@@ -16,6 +16,8 @@ from pathlib import Path
 # The correctness-critical modules. These carry the ledger invariants:
 # engine.rs (posting, holds, idempotency), balances.rs (derived balances),
 # money.rs (fee math), reconcile.rs (rail matching).
+# `types.rs` is intentionally excluded: it is mostly data-shape enums and not
+# the financial decision logic that sets the core coverage bar.
 CORE_FILES = [
     "ledger/src/engine.rs",
     "ledger/src/balances.rs",

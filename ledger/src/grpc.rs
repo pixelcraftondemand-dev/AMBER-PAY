@@ -27,10 +27,15 @@ use uuid::Uuid;
 pub use crate::grpc_proto::ledger_client::LedgerClient;
 pub use crate::grpc_proto::ledger_server::{Ledger as GrpcLedger, LedgerServer};
 
-/// Interceptor: reject calls without the expected shared secret.
+/// Interceptor: reject calls without the required shared secret.
+fn grpc_token() -> Result<String, Status> {
+    std::env::var("LEDGER_GRPC_TOKEN").map_err(|_| {
+        Status::unauthenticated("missing ledger token configuration: set LEDGER_GRPC_TOKEN")
+    })
+}
+
 fn check_auth<T>(req: &Request<T>) -> Result<(), Status> {
-    let expected =
-        std::env::var("LEDGER_GRPC_TOKEN").unwrap_or_else(|_| "amberpay-internal-dev".to_string());
+    let expected = grpc_token()?;
     let provided = req
         .metadata()
         .get("x-ledger-token")

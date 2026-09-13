@@ -1,0 +1,6 @@
+sl\amberpay\coreapi\checkout\CheckoutControllerTest.class
+sl\amberpay\coreapi\rails\RailControllerTest.class
+sl\amberpay\coreapi\transfer\TransferControllerTest.class
+sl\amberpay\coreapi\agent\AgentControllerTest.class
+sl\amberpay\coreapi\paymentmethod\PaymentMethodControllerTest.class
+sl\amberpay\coreapi\auth\AuthControllerTest.class
